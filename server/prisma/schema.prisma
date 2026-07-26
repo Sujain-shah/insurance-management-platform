@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  AGENT
+  CUSTOMER
+}
+
+enum PolicyStatus {
+  ACTIVE
+  EXPIRED
+  PENDING
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  email      String    @unique
+  password   String
+  role       Role
+
+  customer   Customer?
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Customer {
+  id         Int       @id @default(autoincrement())
+
+  fullName   String
+  phone      String
+  address    String
+  dob        DateTime
+
+  userId     Int       @unique
+  user       User      @relation(fields: [userId], references: [id])
+
+  policies   Policy[]
+
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Policy {
+  id             Int            @id @default(autoincrement())
+  policyNumber   String         @unique
+  policyName     String
+  policyType     String
+  premiumAmount  Float
+  startDate      DateTime
+  endDate        DateTime
+  status         PolicyStatus
+
+  customerId     Int
+  customer       Customer       @relation(fields: [customerId], references: [id])
+
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+}
