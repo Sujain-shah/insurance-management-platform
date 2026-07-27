@@ -3,20 +3,19 @@ const cors = require("cors");
 
 const authRoutes = require("./routes/authRoutes");
 const customerRoutes = require("./routes/customerRoutes");
+const policyRoutes = require("./routes/policyRoutes");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.send("Insurance Management API Running...");
+});
+
 app.use("/api/auth", authRoutes);
 app.use("/api/customers", customerRoutes);
-
-app.get("/", (req, res) => {
-  res.json({
-    success: true,
-    message: "Insurance Management Backend is Running 🚀",
-  });
-});
+app.use("/api/policies", policyRoutes);
 
 module.exports = app;
