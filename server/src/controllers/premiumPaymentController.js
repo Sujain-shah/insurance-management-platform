@@ -59,6 +59,50 @@ const getAllPremiumPayments = async (req, res) => {
     }
 };
 
+// Get My Premium Payments (Customer)
+const getMyPremiumPayments = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const customer = await prisma.customer.findUnique({
+            where: {
+                userId,
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        const payments = await prisma.premiumPayment.findMany({
+            where: {
+                policy: {
+                    customerId: customer.id,
+                },
+            },
+            include: {
+                policy: true,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: payments,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
 // Get Premium Payment By ID
 const getPremiumPaymentById = async (req, res) => {
     try {
@@ -160,6 +204,7 @@ const deletePremiumPayment = async (req, res) => {
 module.exports = {
     addPremiumPayment,
     getAllPremiumPayments,
+    getMyPremiumPayments,
     getPremiumPaymentById,
     updatePremiumPayment,
     deletePremiumPayment,

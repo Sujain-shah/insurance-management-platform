@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-
+import Users from "./pages/Users";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Customers from "./pages/Customers";
@@ -72,6 +72,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["ADMIN", "AGENT"]}>
               <Documents />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/users"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <Users />
             </ProtectedRoute>
           }
         />

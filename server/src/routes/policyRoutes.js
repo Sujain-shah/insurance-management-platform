@@ -9,11 +9,11 @@ const {
 const {
   addPolicy,
   getAllPolicies,
+  getMyPolicies,
   getPolicyById,
   updatePolicy,
   deletePolicy,
 } = require("../controllers/policyController");
-
 // Create Policy (Admin & Agent)
 router.post(
   "/",
@@ -28,6 +28,13 @@ router.get(
   auth,
   authorizeRoles("ADMIN", "AGENT"),
   getAllPolicies
+);
+// My Policies (Customer)
+router.get(
+  "/my",
+  auth,
+  authorizeRoles("CUSTOMER"),
+  getMyPolicies
 );
 
 // Get Policy By ID (Admin & Agent)

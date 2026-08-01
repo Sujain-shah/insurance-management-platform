@@ -5,6 +5,7 @@ const router = express.Router();
 const {
   addClaim,
   getAllClaims,
+  getMyClaims,
   getClaimById,
   updateClaim,
   deleteClaim,
@@ -29,6 +30,14 @@ router.get(
   auth,
   authorizeRoles("ADMIN", "AGENT"),
   getAllClaims
+);
+
+// My Claims (Customer)
+router.get(
+  "/my",
+  auth,
+  authorizeRoles("CUSTOMER"),
+  getMyClaims
 );
 
 // Get Claim By ID (Admin & Agent)

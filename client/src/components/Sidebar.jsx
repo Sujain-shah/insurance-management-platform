@@ -29,6 +29,15 @@ function Sidebar() {
           </Link>
         )}
 
+        {role === "ADMIN" && (
+          <Link
+            to="/users"
+            className="hover:bg-blue-600 p-3 rounded-lg"
+          >
+            👥 Users
+          </Link>
+        )}
+
         {/* Customers */}
         {(role === "ADMIN" || role === "AGENT") && (
           <Link
@@ -101,6 +110,13 @@ function Sidebar() {
               className="hover:bg-blue-600 p-3 rounded-lg"
             >
               💳 My Payments
+            </Link>
+
+            <Link
+              to="/users"
+              className="hover:bg-blue-600 p-3 rounded-lg"
+            >
+              👥 Users
             </Link>
           </>
         )}

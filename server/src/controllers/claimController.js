@@ -59,6 +59,49 @@ const getAllClaims = async (req, res) => {
         });
     }
 };
+// Get My Claims (Customer)
+const getMyClaims = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const customer = await prisma.customer.findUnique({
+            where: {
+                userId,
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        const claims = await prisma.claim.findMany({
+            where: {
+                policy: {
+                    customerId: customer.id,
+                },
+            },
+            include: {
+                policy: true,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: claims,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
 
 // Get Claim By ID
 const getClaimById = async (req, res) => {
@@ -161,6 +204,7 @@ const deleteClaim = async (req, res) => {
 module.exports = {
     addClaim,
     getAllClaims,
+    getMyClaims,
     getClaimById,
     updateClaim,
     deleteClaim,

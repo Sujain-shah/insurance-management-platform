@@ -3,56 +3,64 @@ const express = require("express");
 const router = express.Router();
 
 const {
-  addPremiumPayment,
-  getAllPremiumPayments,
-  getPremiumPaymentById,
-  updatePremiumPayment,
-  deletePremiumPayment,
+    addPremiumPayment,
+    getAllPremiumPayments,
+    getMyPremiumPayments,
+    getPremiumPaymentById,
+    updatePremiumPayment,
+    deletePremiumPayment,
 } = require("../controllers/premiumPaymentController");
 
 const {
-  auth,
-  authorizeRoles,
+    auth,
+    authorizeRoles,
 } = require("../middleware/authMiddleware");
 
 // Create Premium Payment (Admin & Agent)
 router.post(
-  "/",
-  auth,
-  authorizeRoles("ADMIN", "AGENT"),
-  addPremiumPayment
+    "/",
+    auth,
+    authorizeRoles("ADMIN", "AGENT"),
+    addPremiumPayment
 );
 
 // Get All Premium Payments (Admin & Agent)
 router.get(
-  "/",
-  auth,
-  authorizeRoles("ADMIN", "AGENT"),
-  getAllPremiumPayments
+    "/",
+    auth,
+    authorizeRoles("ADMIN", "AGENT"),
+    getAllPremiumPayments
 );
 
+// My Premium Payments (Customer)
+router.get(
+    "/my",
+    auth,
+    authorizeRoles("CUSTOMER"),
+    getMyPremiumPayments
+);
 // Get Premium Payment By ID (Admin & Agent)
 router.get(
-  "/:id",
-  auth,
-  authorizeRoles("ADMIN", "AGENT"),
-  getPremiumPaymentById
+    "/:id",
+    auth,
+    authorizeRoles("ADMIN", "AGENT"),
+    getPremiumPaymentById
 );
 
 // Update Premium Payment (Admin & Agent)
 router.put(
-  "/:id",
-  auth,
-  authorizeRoles("ADMIN", "AGENT"),
-  updatePremiumPayment
+    "/:id",
+    auth,
+    authorizeRoles("ADMIN", "AGENT"),
+    updatePremiumPayment
 );
 
 // Delete Premium Payment (Admin Only)
 router.delete(
-  "/:id",
-  auth,
-  authorizeRoles("ADMIN"),
-  deletePremiumPayment
+    "/:id",
+    auth,
+    authorizeRoles("ADMIN"),
+    deletePremiumPayment
 );
 
 module.exports = router;

@@ -78,6 +78,45 @@ const getAllPolicies = async (req, res) => {
     }
 };
 
+// Get My Policies (Customer)
+const getMyPolicies = async (req, res) => {
+    try {
+        const userId = req.user.id;
+
+        const customer = await prisma.customer.findUnique({
+            where: {
+                userId,
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        const policies = await prisma.policy.findMany({
+            where: {
+                customerId: customer.id,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: policies,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
 // Get Policy By ID
 const getPolicyById = async (req, res) => {
     try {
@@ -175,6 +214,7 @@ const deletePolicy = async (req, res) => {
 module.exports = {
     addPolicy,
     getAllPolicies,
+    getMyPolicies,
     getPolicyById,
     updatePolicy,
     deletePolicy,
