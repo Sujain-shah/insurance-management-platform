@@ -7,6 +7,10 @@ import Policies from "./pages/Policies";
 import Claims from "./pages/Claims";
 import PremiumPayments from "./pages/PremiumPayments";
 import Documents from "./pages/Documents";
+import Register from "./pages/Register";
+import MyPolicies from "./pages/MyPolicies";
+import MyClaims from "./pages/MyClaims";
+import MyPayments from "./pages/MyPayments";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -16,6 +20,7 @@ function App() {
       <Routes>
 
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
 
         <Route
           path="/dashboard"
@@ -71,9 +76,38 @@ function App() {
           }
         />
 
+        <Route
+          path="/my-policies"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <MyPolicies />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-claims"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <MyClaims />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/my-payments"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <MyPayments />
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );
+
+
 }
 
 export default App;

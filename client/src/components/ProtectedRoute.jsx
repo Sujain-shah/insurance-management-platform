@@ -14,8 +14,8 @@ function ProtectedRoute({ children, allowedRoles }) {
     }
 
     if (role === "CUSTOMER") {
-      return <Navigate to="/" replace />;
-    }
+  return <Navigate to="/my-policies" replace />;
+}
 
     return <Navigate to="/" replace />;
   }

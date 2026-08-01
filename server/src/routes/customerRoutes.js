@@ -14,13 +14,8 @@ const {
   deleteCustomer,
 } = require("../controllers/customerController");
 
-// Create Customer (Admin Only)
-router.post(
-  "/",
-  auth,
-  authorizeRoles("ADMIN"),
-  addCustomer
-);
+// Public Customer Registration
+router.post("/", addCustomer);
 
 // Get All Customers (Admin & Agent)
 router.get(

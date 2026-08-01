@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../services/api";
 
 function Login() {
@@ -20,9 +20,15 @@ function Login() {
             localStorage.setItem("token", res.data.token);
             localStorage.setItem("role", res.data.user.role);
 
-            setMessage("✅ Login Successful");
+            const role = res.data.user.role;
 
-            navigate("/dashboard");
+            if (role === "ADMIN") {
+                navigate("/dashboard");
+            } else if (role === "AGENT") {
+                navigate("/customers");
+            } else {
+                navigate("/my-policies");
+            }
             console.log(res.data);
         } catch (err) {
             setMessage(err.response?.data?.message || "Login Failed");
@@ -63,6 +69,15 @@ function Login() {
                 >
                     Login
                 </button>
+                <p className="text-center mt-5">
+                    Don't have an account?{" "}
+                    <Link
+                        to="/register"
+                        className="text-blue-600 font-semibold"
+                    >
+                        Register
+                    </Link>
+                </p>
 
                 {message && (
                     <p className="text-center mt-4 font-semibold">
