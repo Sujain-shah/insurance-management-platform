@@ -1,7 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
-const auth = require("../middleware/authMiddleware");
+const {
+  auth,
+  authorizeRoles,
+} = require("../middleware/authMiddleware");
 
 const {
   addCustomer,
@@ -11,10 +14,44 @@ const {
   deleteCustomer,
 } = require("../controllers/customerController");
 
-router.post("/", auth, addCustomer);
-router.get("/", auth, getAllCustomers);
-router.get("/:id", auth, getCustomerById);
-router.put("/:id", auth, updateCustomer);
-router.delete("/:id", auth, deleteCustomer);
+// Create Customer (Admin Only)
+router.post(
+  "/",
+  auth,
+  authorizeRoles("ADMIN"),
+  addCustomer
+);
+
+// Get All Customers (Admin & Agent)
+router.get(
+  "/",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  getAllCustomers
+);
+
+// Get Customer By ID (Admin & Agent)
+router.get(
+  "/:id",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  getCustomerById
+);
+
+// Update Customer (Admin & Agent)
+router.put(
+  "/:id",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  updateCustomer
+);
+
+// Delete Customer (Admin Only)
+router.delete(
+  "/:id",
+  auth,
+  authorizeRoles("ADMIN"),
+  deleteCustomer
+);
 
 module.exports = router;

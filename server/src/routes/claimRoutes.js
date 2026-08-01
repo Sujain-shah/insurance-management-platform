@@ -1,57 +1,58 @@
 const express = require("express");
+
 const router = express.Router();
+
+const {
+  addClaim,
+  getAllClaims,
+  getClaimById,
+  updateClaim,
+  deleteClaim,
+} = require("../controllers/claimController");
 
 const {
   auth,
   authorizeRoles,
 } = require("../middleware/authMiddleware");
 
-const {
-  addPolicy,
-  getAllPolicies,
-  getPolicyById,
-  updatePolicy,
-  deletePolicy,
-} = require("../controllers/policyController");
-
-// Create Policy (Admin & Agent)
+// Create Claim (Admin & Agent)
 router.post(
   "/",
   auth,
   authorizeRoles("ADMIN", "AGENT"),
-  addPolicy
+  addClaim
 );
 
-// Get All Policies (Admin & Agent)
+// Get All Claims (Admin & Agent)
 router.get(
   "/",
   auth,
   authorizeRoles("ADMIN", "AGENT"),
-  getAllPolicies
+  getAllClaims
 );
 
-// Get Policy By ID (Admin & Agent)
+// Get Claim By ID (Admin & Agent)
 router.get(
   "/:id",
   auth,
   authorizeRoles("ADMIN", "AGENT"),
-  getPolicyById
+  getClaimById
 );
 
-// Update Policy (Admin & Agent)
+// Update Claim (Admin & Agent)
 router.put(
   "/:id",
   auth,
   authorizeRoles("ADMIN", "AGENT"),
-  updatePolicy
+  updateClaim
 );
 
-// Delete Policy (Admin Only)
+// Delete Claim (Admin Only)
 router.delete(
   "/:id",
   auth,
   authorizeRoles("ADMIN"),
-  deletePolicy
+  deleteClaim
 );
 
 module.exports = router;

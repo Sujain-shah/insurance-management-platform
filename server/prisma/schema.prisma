@@ -19,6 +19,12 @@ enum PolicyStatus {
   PENDING
 }
 
+enum ClaimStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id         Int       @id @default(autoincrement())
   email      String    @unique
@@ -60,7 +66,60 @@ model Policy {
 
   customerId     Int
   customer       Customer       @relation(fields: [customerId], references: [id])
+  claims Claim[]
+  premiumPayments PremiumPayment[]
+  documents Document[]
 
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
+}
+
+model Claim {
+  id             Int          @id @default(autoincrement())
+
+  claimNumber    String       @unique
+  claimAmount    Float
+  reason         String
+  status         ClaimStatus  @default(PENDING)
+
+  policyId       Int
+  policy         Policy       @relation(fields: [policyId], references: [id])
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+enum PaymentStatus {
+  PAID
+  PENDING
+  OVERDUE
+}
+
+model PremiumPayment {
+  id             Int             @id @default(autoincrement())
+
+  amount         Float
+  paymentDate    DateTime
+  paymentStatus  PaymentStatus   @default(PENDING)
+  paymentMethod  String
+
+  policyId       Int
+  policy         Policy          @relation(fields: [policyId], references: [id])
+
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Document {
+  id Int @id @default(autoincrement())
+
+  fileName String
+  filePath String
+  fileType String
+
+  policyId Int
+  policy Policy @relation(fields: [policyId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

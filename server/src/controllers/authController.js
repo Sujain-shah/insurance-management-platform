@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 // Register
 const register = async (req, res) => {
   try {
-    const { email, password, role } = req.body;
+    const { email, password } = req.body;
 
     const existingUser = await prisma.user.findUnique({
       where: { email },
@@ -24,7 +24,7 @@ const register = async (req, res) => {
       data: {
         email,
         password: hashedPassword,
-        role,
+        role: "CUSTOMER",
       },
     });
 
@@ -70,6 +70,7 @@ const login = async (req, res) => {
     const token = jwt.sign(
       {
         id: user.id,
+        email: user.email,
         role: user.role,
       },
       "mysecretkey",
@@ -82,6 +83,11 @@ const login = async (req, res) => {
       success: true,
       message: "Login Successful",
       token,
+      user: {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
     console.log(error);
