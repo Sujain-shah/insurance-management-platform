@@ -6,6 +6,9 @@ function Claims() {
     const [claims, setClaims] = useState([]);
     const [policies, setPolicies] = useState([]);
     const [search, setSearch] = useState("");
+    const [documents, setDocuments] = useState([]);
+    const [selectedClaim, setSelectedClaim] = useState(null);
+    const [remarks, setRemarks] = useState("");
 
     const [showAddModal, setShowAddModal] = useState(false);
 
@@ -42,6 +45,53 @@ function Claims() {
             });
 
             setClaims(res.data.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const viewDocuments = async (claimId) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await api.get(`/claim-documents/${claimId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setDocuments(res.data.data);
+            setSelectedClaim(claimId);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const verifyClaim = async (claimId, status) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            await api.put(
+                `/claims/${claimId}/verify`,
+                {
+                    status,
+                    remarks,
+                },
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            alert(`Claim ${status}`);
+
+            setRemarks("");
+            setSelectedClaim(null);
+
+            fetchClaims();
+
         } catch (error) {
             console.log(error);
         }
@@ -248,7 +298,12 @@ function Claims() {
                                     >
                                         Edit
                                     </button>
-
+                                    <button
+                                        onClick={() => viewDocuments(claim.id)}
+                                        className="bg-indigo-600 text-white px-3 py-1 rounded hover:bg-indigo-700"
+                                    >
+                                        Documents
+                                    </button>
                                     <button
                                         onClick={() => deleteClaim(claim.id)}
                                         className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
@@ -271,7 +326,57 @@ function Claims() {
                         )}
                     </tbody>
                 </table>
+
             </div>
+            {selectedClaim && (
+                <div className="mt-8 bg-white rounded-xl shadow-lg p-6">
+
+                    <h2 className="text-2xl font-bold mb-4">
+                        Claim Documents
+                    </h2>
+
+                    {documents.map((doc) => (
+                        <div key={doc.id} className="mb-3">
+
+                            <a
+                                href={`http://localhost:5000/${doc.filePath}`}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-blue-600 underline"
+                            >
+                                {doc.fileName}
+                            </a>
+
+                        </div>
+                    ))}
+
+                    <textarea
+                        placeholder="Remarks"
+                        value={remarks}
+                        onChange={(e) => setRemarks(e.target.value)}
+                        className="border rounded p-3 w-full mt-4"
+                    />
+
+                    <div className="flex gap-3 mt-4">
+
+                        <button
+                            onClick={() => verifyClaim(selectedClaim, "APPROVED")}
+                            className="bg-green-600 text-white px-5 py-2 rounded"
+                        >
+                            Approve
+                        </button>
+
+                        <button
+                            onClick={() => verifyClaim(selectedClaim, "REJECTED")}
+                            className="bg-red-600 text-white px-5 py-2 rounded"
+                        >
+                            Reject
+                        </button>
+
+                    </div>
+
+                </div>
+            )}
             {/* Add Claim Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

@@ -7,6 +7,7 @@ const {
   getAllClaims,
   getMyClaims,
   getClaimById,
+  verifyClaim,
   updateClaim,
   deleteClaim,
 } = require("../controllers/claimController");
@@ -16,11 +17,11 @@ const {
   authorizeRoles,
 } = require("../middleware/authMiddleware");
 
-// Create Claim (Admin & Agent)
+// Create Claim (Customer)
 router.post(
   "/",
   auth,
-  authorizeRoles("ADMIN", "AGENT"),
+  authorizeRoles("CUSTOMER"),
   addClaim
 );
 
@@ -38,6 +39,14 @@ router.get(
   auth,
   authorizeRoles("CUSTOMER"),
   getMyClaims
+);
+
+// Verify Claim (Admin & Agent)
+router.put(
+  "/:id/verify",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  verifyClaim
 );
 
 // Get Claim By ID (Admin & Agent)

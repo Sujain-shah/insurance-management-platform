@@ -80,6 +80,122 @@ const getAllCustomers = async (req, res) => {
     }
 };
 
+// Search Customers
+const searchCustomers = async (req, res) => {
+    try {
+        const { keyword } = req.query;
+
+        const customers = await prisma.customer.findMany({
+            where: {
+                OR: [
+                    {
+                        fullName: {
+                            contains: keyword,
+                            mode: "insensitive",
+                        },
+                    },
+                    {
+                        user: {
+                            email: {
+                                contains: keyword,
+                                mode: "insensitive",
+                            },
+                        },
+                    },
+                    {
+                        phone: {
+                            contains: keyword,
+                        },
+                    },
+                ],
+            },
+            include: {
+                user: true,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: customers,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
+// Get My Profile
+const getMyProfile = async (req, res) => {
+    try {
+        const customer = await prisma.customer.findUnique({
+            where: {
+                userId: req.user.id,
+            },
+            include: {
+                user: true,
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: customer,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
+// Update My Profile
+const updateMyProfile = async (req, res) => {
+    try {
+        const { fullName, phone, address, dob } = req.body;
+
+        const customer = await prisma.customer.update({
+            where: {
+                userId: req.user.id,
+            },
+            data: {
+                fullName,
+                phone,
+                address,
+                dob: new Date(dob),
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Profile Updated Successfully",
+            data: customer,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
 // Get Customer By ID
 const getCustomerById = async (req, res) => {
     try {
@@ -187,9 +303,82 @@ const deleteCustomer = async (req, res) => {
     }
 };
 
+// Customer History
+const getCustomerHistory = async (req, res) => {
+    try {
+
+        const customer = await prisma.customer.findUnique({
+            where: {
+                userId: req.user.id,
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        const totalPolicies = await prisma.policy.count({
+            where: {
+                customerId: customer.id,
+            },
+        });
+
+        const totalClaims = await prisma.claim.count({
+            where: {
+                policy: {
+                    customerId: customer.id,
+                },
+            },
+        });
+
+        const totalPayments = await prisma.premiumPayment.count({
+            where: {
+                policy: {
+                    customerId: customer.id,
+                },
+            },
+        });
+
+        const totalDocuments = await prisma.document.count({
+            where: {
+                policy: {
+                    customerId: customer.id,
+                },
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: {
+                totalPolicies,
+                totalClaims,
+                totalPayments,
+                totalDocuments,
+            },
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+
+    }
+};
+
 module.exports = {
     addCustomer,
     getAllCustomers,
+    searchCustomers,
+    getMyProfile,
+    updateMyProfile,
+    getCustomerHistory,
     getCustomerById,
     updateCustomer,
     deleteCustomer,

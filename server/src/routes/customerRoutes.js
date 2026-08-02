@@ -9,6 +9,10 @@ const {
 const {
   addCustomer,
   getAllCustomers,
+  searchCustomers,
+  getMyProfile,
+  updateMyProfile,
+  getCustomerHistory,
   getCustomerById,
   updateCustomer,
   deleteCustomer,
@@ -16,6 +20,38 @@ const {
 
 // Public Customer Registration
 router.post("/", addCustomer);
+
+// Customer Profile
+router.get(
+  "/profile",
+  auth,
+  authorizeRoles("CUSTOMER"),
+  getMyProfile
+);
+
+// Update Own Profile
+router.put(
+  "/profile",
+  auth,
+  authorizeRoles("CUSTOMER"),
+  updateMyProfile
+);
+
+// Customer History
+router.get(
+  "/history",
+  auth,
+  authorizeRoles("CUSTOMER"),
+  getCustomerHistory
+);
+
+// Search Customers
+router.get(
+  "/search",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  searchCustomers
+);
 
 // Get All Customers (Admin & Agent)
 router.get(

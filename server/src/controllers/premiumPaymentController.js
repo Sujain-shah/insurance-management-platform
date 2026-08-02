@@ -8,6 +8,7 @@ const addPremiumPayment = async (req, res) => {
         const {
             amount,
             paymentDate,
+            dueDate,
             paymentStatus,
             paymentMethod,
             policyId,
@@ -17,6 +18,7 @@ const addPremiumPayment = async (req, res) => {
             data: {
                 amount: Number(amount),
                 paymentDate: new Date(paymentDate),
+                dueDate: dueDate ? new Date(dueDate) : null,
                 paymentStatus,
                 paymentMethod,
                 policyId: Number(policyId),
@@ -28,11 +30,13 @@ const addPremiumPayment = async (req, res) => {
             message: "Premium Payment Added Successfully",
             data: payment,
         });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             success: false,
-            message: "Server Error",
+            message: error.message,
         });
     }
 };
@@ -40,33 +44,52 @@ const addPremiumPayment = async (req, res) => {
 // Get All Premium Payments
 const getAllPremiumPayments = async (req, res) => {
     try {
+
         const payments = await prisma.premiumPayment.findMany({
             include: {
                 policy: true,
             },
         });
 
+        const today = new Date();
+
+        const updatedPayments = payments.map((payment) => {
+
+            if (
+                payment.paymentStatus === "PENDING" &&
+                payment.dueDate &&
+                new Date(payment.dueDate) < today
+            ) {
+                payment.paymentStatus = "OVERDUE";
+            }
+
+            return payment;
+        });
+
         res.status(200).json({
             success: true,
-            data: payments,
+            data: updatedPayments,
         });
+
     } catch (error) {
+
         console.log(error);
+
         res.status(500).json({
             success: false,
             message: "Server Error",
         });
+
     }
 };
 
-// Get My Premium Payments (Customer)
+// Get My Premium Payments
 const getMyPremiumPayments = async (req, res) => {
     try {
-        const userId = req.user.id;
 
         const customer = await prisma.customer.findUnique({
             where: {
-                userId,
+                userId: req.user.id,
             },
         });
 
@@ -88,24 +111,41 @@ const getMyPremiumPayments = async (req, res) => {
             },
         });
 
+        const today = new Date();
+
+        const updatedPayments = payments.map((payment) => {
+
+            if (
+                payment.paymentStatus === "PENDING" &&
+                payment.dueDate &&
+                new Date(payment.dueDate) < today
+            ) {
+                payment.paymentStatus = "OVERDUE";
+            }
+
+            return payment;
+        });
+
         res.status(200).json({
             success: true,
-            data: payments,
+            data: updatedPayments,
         });
 
     } catch (error) {
+
         console.log(error);
 
         res.status(500).json({
             success: false,
             message: "Server Error",
         });
+
     }
 };
-
 // Get Premium Payment By ID
 const getPremiumPaymentById = async (req, res) => {
     try {
+
         const { id } = req.params;
 
         const payment = await prisma.premiumPayment.findUnique({
@@ -120,31 +160,45 @@ const getPremiumPaymentById = async (req, res) => {
         if (!payment) {
             return res.status(404).json({
                 success: false,
-                message: "Premium Payment not found",
+                message: "Premium Payment Not Found",
             });
+        }
+
+        if (
+            payment.paymentStatus === "PENDING" &&
+            payment.dueDate &&
+            new Date(payment.dueDate) < new Date()
+        ) {
+            payment.paymentStatus = "OVERDUE";
         }
 
         res.status(200).json({
             success: true,
             data: payment,
         });
+
     } catch (error) {
+
         console.log(error);
+
         res.status(500).json({
             success: false,
             message: "Server Error",
         });
+
     }
 };
 
 // Update Premium Payment
 const updatePremiumPayment = async (req, res) => {
     try {
+
         const { id } = req.params;
 
         const {
             amount,
             paymentDate,
+            dueDate,
             paymentStatus,
             paymentMethod,
             policyId,
@@ -157,6 +211,7 @@ const updatePremiumPayment = async (req, res) => {
             data: {
                 amount: Number(amount),
                 paymentDate: new Date(paymentDate),
+                dueDate: dueDate ? new Date(dueDate) : null,
                 paymentStatus,
                 paymentMethod,
                 policyId: Number(policyId),
@@ -168,18 +223,23 @@ const updatePremiumPayment = async (req, res) => {
             message: "Premium Payment Updated Successfully",
             data: payment,
         });
+
     } catch (error) {
+
         console.log(error);
+
         res.status(500).json({
             success: false,
-            message: "Server Error",
+            message: error.message,
         });
+
     }
 };
 
 // Delete Premium Payment
 const deletePremiumPayment = async (req, res) => {
     try {
+
         const { id } = req.params;
 
         await prisma.premiumPayment.delete({
@@ -192,12 +252,16 @@ const deletePremiumPayment = async (req, res) => {
             success: true,
             message: "Premium Payment Deleted Successfully",
         });
+
     } catch (error) {
+
         console.log(error);
+
         res.status(500).json({
             success: false,
             message: "Server Error",
         });
+
     }
 };
 

@@ -10,6 +10,7 @@ function Policies() {
     const [showAddModal, setShowAddModal] = useState(false);
 
     const [editingPolicy, setEditingPolicy] = useState(null);
+    const [expiringPolicies, setExpiringPolicies] = useState([]);
 
     const [newPolicy, setNewPolicy] = useState({
         policyName: "",
@@ -33,6 +34,7 @@ function Policies() {
     useEffect(() => {
         fetchPolicies();
         fetchCustomers();
+        fetchExpiringPolicies();
     }, []);
 
     const fetchPolicies = async () => {
@@ -66,6 +68,74 @@ function Policies() {
             console.log(error);
         }
     };
+
+    const fetchExpiringPolicies = async () => {
+        try {
+            const token = localStorage.getItem("token");
+
+            const res = await api.get("/policies/expiring", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setExpiringPolicies(res.data.data);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const renewPolicy = async (id) => {
+        try {
+            const token = localStorage.getItem("token");
+
+            await api.put(
+                `/policies/${id}/renew`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            alert("Policy Renewed Successfully");
+
+            fetchPolicies();
+            fetchExpiringPolicies();
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const cancelPolicy = async (id) => {
+        if (!window.confirm("Cancel this policy?")) return;
+
+        try {
+            const token = localStorage.getItem("token");
+
+            await api.put(
+                `/policies/${id}/cancel`,
+                {},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            alert("Policy Cancelled");
+
+            fetchPolicies();
+            fetchExpiringPolicies();
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const addPolicy = async () => {
         try {
             const token = localStorage.getItem("token");
@@ -187,6 +257,11 @@ function Policies() {
     return (
         <Layout>
             <div className="flex justify-between items-center mb-6">
+                {expiringPolicies.length > 0 && (
+                    <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 p-4 rounded-lg mb-6">
+                        ⚠️ {expiringPolicies.length} polic{expiringPolicies.length === 1 ? "y is" : "ies are"} expiring within the next 30 days.
+                    </div>
+                )}
                 <h1 className="text-3xl font-bold text-blue-700">
                     Policies
                 </h1>
@@ -243,7 +318,18 @@ function Policies() {
                                 </td>
 
                                 <td className="p-4">
-                                    {policy.status}
+                                    <span
+                                        className={`px-3 py-1 rounded-full text-white ${policy.status === "ACTIVE"
+                                            ? "bg-green-600"
+                                            : policy.status === "EXPIRED"
+                                                ? "bg-red-600"
+                                                : policy.status === "CANCELLED"
+                                                    ? "bg-gray-600"
+                                                    : "bg-yellow-600"
+                                            }`}
+                                    >
+                                        {policy.status}
+                                    </span>
                                 </td>
 
                                 <td className="p-4 space-x-2">
@@ -255,7 +341,19 @@ function Policies() {
                                     >
                                         Edit
                                     </button>
+                                    <button
+                                        onClick={() => renewPolicy(policy.id)}
+                                        className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                                    >
+                                        Renew
+                                    </button>
 
+                                    <button
+                                        onClick={() => cancelPolicy(policy.id)}
+                                        className="bg-orange-600 text-white px-3 py-1 rounded hover:bg-orange-700"
+                                    >
+                                        Cancel
+                                    </button>
                                     <button
                                         onClick={() =>
                                             deletePolicy(policy.id)

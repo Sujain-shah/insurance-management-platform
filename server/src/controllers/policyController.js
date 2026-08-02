@@ -117,6 +117,113 @@ const getMyPolicies = async (req, res) => {
     }
 };
 
+// Renew Policy
+const renewPolicy = async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+
+        const policy = await prisma.policy.findUnique({
+            where: { id },
+        });
+
+        if (!policy) {
+            return res.status(404).json({
+                success: false,
+                message: "Policy Not Found",
+            });
+        }
+
+        const newEndDate = new Date(policy.endDate);
+        newEndDate.setFullYear(newEndDate.getFullYear() + 1);
+
+        const updatedPolicy = await prisma.policy.update({
+            where: { id },
+            data: {
+                endDate: newEndDate,
+                status: "ACTIVE",
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Policy Renewed Successfully",
+            data: updatedPolicy,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
+// Cancel Policy
+const cancelPolicy = async (req, res) => {
+    try {
+        const id = Number(req.params.id);
+
+        const policy = await prisma.policy.update({
+            where: { id },
+            data: {
+                status: "CANCELLED",
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Policy Cancelled Successfully",
+            data: policy,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
+// Get Expiring Policies
+const getExpiringPolicies = async (req, res) => {
+    try {
+        const today = new Date();
+
+        const after30Days = new Date();
+        after30Days.setDate(today.getDate() + 30);
+
+        const policies = await prisma.policy.findMany({
+            where: {
+                endDate: {
+                    gte: today,
+                    lte: after30Days,
+                },
+                status: "ACTIVE",
+            },
+            include: {
+                customer: true,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            data: policies,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
 // Get Policy By ID
 const getPolicyById = async (req, res) => {
     try {
@@ -215,6 +322,9 @@ module.exports = {
     addPolicy,
     getAllPolicies,
     getMyPolicies,
+    renewPolicy,
+    cancelPolicy,
+    getExpiringPolicies,
     getPolicyById,
     updatePolicy,
     deletePolicy,

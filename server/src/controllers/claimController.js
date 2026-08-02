@@ -9,28 +9,57 @@ const addClaim = async (req, res) => {
             claimNumber,
             claimAmount,
             reason,
-            status,
             policyId,
         } = req.body;
-        console.log(req.body);
+
+        // Logged in customer
+        const customer = await prisma.customer.findUnique({
+            where: {
+                userId: req.user.id,
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        // Check policy belongs to customer
+        const policy = await prisma.policy.findFirst({
+            where: {
+                id: Number(policyId),
+                customerId: customer.id,
+            },
+        });
+
+        if (!policy) {
+            return res.status(403).json({
+                success: false,
+                message: "Invalid Policy",
+            });
+        }
 
         const claim = await prisma.claim.create({
             data: {
                 claimNumber,
                 claimAmount: Number(claimAmount),
                 reason,
-                status,
-                policyId: Number(policyId),
-            }
+                status: "PENDING",
+                policyId: policy.id,
+            },
         });
 
         res.status(201).json({
             success: true,
-            message: "Claim created successfully",
+            message: "Claim Submitted Successfully",
             data: claim,
         });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             success: false,
             message: "Server Error",
@@ -137,6 +166,40 @@ const getClaimById = async (req, res) => {
     }
 };
 
+// Verify Claim (Admin & Agent)
+const verifyClaim = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status, remarks } = req.body;
+
+        const claim = await prisma.claim.update({
+            where: {
+                id: Number(id),
+            },
+            data: {
+                status,
+                remarks,
+                verifiedAt: new Date(),
+                verifiedBy: req.user.id,
+            },
+        });
+
+        res.status(200).json({
+            success: true,
+            message: "Claim Verified Successfully",
+            data: claim,
+        });
+
+    } catch (error) {
+        console.log(error);
+
+        res.status(500).json({
+            success: false,
+            message: "Server Error",
+        });
+    }
+};
+
 // Update Claim
 const updateClaim = async (req, res) => {
     try {
@@ -206,6 +269,7 @@ module.exports = {
     getAllClaims,
     getMyClaims,
     getClaimById,
+    verifyClaim,
     updateClaim,
     deleteClaim,
 };

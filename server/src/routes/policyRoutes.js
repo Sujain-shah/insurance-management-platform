@@ -10,10 +10,14 @@ const {
   addPolicy,
   getAllPolicies,
   getMyPolicies,
+  renewPolicy,
+  cancelPolicy,
+  getExpiringPolicies,
   getPolicyById,
   updatePolicy,
   deletePolicy,
 } = require("../controllers/policyController");
+
 // Create Policy (Admin & Agent)
 router.post(
   "/",
@@ -35,6 +39,30 @@ router.get(
   auth,
   authorizeRoles("CUSTOMER"),
   getMyPolicies
+);
+
+// Expiring Policies (Admin & Agent)
+router.get(
+  "/expiring",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  getExpiringPolicies
+);
+
+// Renew Policy (Admin & Agent)
+router.put(
+  "/:id/renew",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  renewPolicy
+);
+
+// Cancel Policy (Admin & Agent)
+router.put(
+  "/:id/cancel",
+  auth,
+  authorizeRoles("ADMIN", "AGENT"),
+  cancelPolicy
 );
 
 // Get Policy By ID (Admin & Agent)

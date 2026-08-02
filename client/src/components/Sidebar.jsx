@@ -92,6 +92,13 @@ function Sidebar() {
         {role === "CUSTOMER" && (
           <>
             <Link
+              to="/profile"
+              className="hover:bg-blue-600 p-3 rounded-lg"
+            >
+              👤 My Profile
+            </Link>
+
+            <Link
               to="/my-policies"
               className="hover:bg-blue-600 p-3 rounded-lg"
             >
@@ -104,20 +111,26 @@ function Sidebar() {
             >
               📋 My Claims
             </Link>
-
+            <Link
+              to="/submit-claim"
+              className="hover:bg-blue-600 p-3 rounded-lg"
+            >
+              ➕ Submit Claim
+            </Link>
             <Link
               to="/my-payments"
               className="hover:bg-blue-600 p-3 rounded-lg"
             >
-              💳 My Payments
+              💳 My Premium Payments
             </Link>
 
             <Link
-              to="/users"
+              to="/history"
               className="hover:bg-blue-600 p-3 rounded-lg"
             >
-              👥 Users
+              📜 History
             </Link>
+
           </>
         )}
 
@@ -129,7 +142,7 @@ function Sidebar() {
         </button>
 
       </nav>
-    </div>
+    </div >
   );
 }
 

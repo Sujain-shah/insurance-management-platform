@@ -8,7 +8,7 @@ const authRoutes = require("./routes/authRoutes");
 const customerRoutes = require("./routes/customerRoutes");
 const policyRoutes = require("./routes/policyRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
-
+const claimDocumentRoutes = require("./routes/claimDocumentRoutes");
 const app = express();
 
 app.use(cors());
@@ -27,5 +27,6 @@ app.use("/api/premium-payments", premiumPaymentRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/claim-documents", claimDocumentRoutes);
 
 module.exports = app;

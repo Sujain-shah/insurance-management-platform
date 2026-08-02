@@ -11,7 +11,9 @@ import Register from "./pages/Register";
 import MyPolicies from "./pages/MyPolicies";
 import MyClaims from "./pages/MyClaims";
 import MyPayments from "./pages/MyPayments";
-
+import Profile from "./pages/Profile";
+import CustomerHistory from "./pages/CustomerHistory";
+import SubmitClaim from "./pages/SubmitClaim";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
@@ -108,6 +110,33 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={["CUSTOMER"]}>
               <MyPayments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <CustomerHistory />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/submit-claim"
+          element={
+            <ProtectedRoute allowedRoles={["CUSTOMER"]}>
+              <SubmitClaim />
             </ProtectedRoute>
           }
         />

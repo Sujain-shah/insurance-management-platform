@@ -1,224 +1,320 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Layout from "../components/Layout";
 import api from "../services/api";
 
 function Documents() {
-  const [documents, setDocuments] = useState([]);
-  const [policies, setPolicies] = useState([]);
 
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [policyId, setPolicyId] = useState("");
+    const [documents, setDocuments] = useState([]);
+    const [policies, setPolicies] = useState([]);
 
-  useEffect(() => {
-    fetchDocuments();
-    fetchPolicies();
-  }, []);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [policyId, setPolicyId] = useState("");
+    const [search, setSearch] = useState("");
 
-  const fetchDocuments = async () => {
-    try {
-      const token = localStorage.getItem("token");
+    useEffect(() => {
+        fetchDocuments();
+        fetchPolicies();
+    }, []);
 
-      const res = await api.get("/documents", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+    const fetchDocuments = async () => {
+        try {
 
-      setDocuments(res.data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+            const token = localStorage.getItem("token");
 
-  const fetchPolicies = async () => {
-    try {
-      const token = localStorage.getItem("token");
+            const res = await api.get("/documents", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
 
-      const res = await api.get("/policies", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+            setDocuments(res.data.data);
 
-      setPolicies(res.data.data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const fetchPolicies = async () => {
+        try {
+
+            const token = localStorage.getItem("token");
+
+            const res = await api.get("/policies", {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setPolicies(res.data.data);
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     const uploadDocument = async () => {
-    try {
-      if (!selectedFile || !policyId) {
-        alert("Please select a policy and a file.");
-        return;
-      }
 
-      const token = localStorage.getItem("token");
+        try {
 
-      const formData = new FormData();
-      formData.append("file", selectedFile);
-      formData.append("policyId", policyId);
+            if (!selectedFile || !policyId) {
+                alert("Please select a policy and a file.");
+                return;
+            }
 
-      await api.post("/documents", formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
-      });
+            const token = localStorage.getItem("token");
 
-      alert("Document uploaded successfully.");
+            const formData = new FormData();
 
-      setSelectedFile(null);
-      setPolicyId("");
+            formData.append("file", selectedFile);
+            formData.append("policyId", policyId);
 
-      fetchDocuments();
-    } catch (error) {
-      console.log(error);
+            await api.post("/documents", formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
-      alert(
-        error.response?.data?.message ||
-        "Failed to upload document."
-      );
-    }
-  };
+            alert("Document Uploaded Successfully");
 
-  const deleteDocument = async (id) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this document?"
-    );
+            setSelectedFile(null);
+            setPolicyId("");
 
-    if (!confirmDelete) return;
+            fetchDocuments();
 
-    try {
-      const token = localStorage.getItem("token");
+        } catch (error) {
 
-      await api.delete(`/documents/${id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+            console.log(error);
 
-      alert("Document deleted successfully.");
+            alert(
+                error.response?.data?.message ||
+                "Upload Failed"
+            );
 
-      fetchDocuments();
-    } catch (error) {
-      console.log(error);
+        }
+    };
 
-      alert(
-        error.response?.data?.message ||
-        "Failed to delete document."
-      );
-    }
-  };
+    const deleteDocument = async (id) => {
+
+        if (!window.confirm("Delete this document?"))
+            return;
+
+        try {
+
+            const token = localStorage.getItem("token");
+
+            await api.delete(`/documents/${id}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            fetchDocuments();
+
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    const filteredDocuments = useMemo(() => {
+
+        return documents.filter((doc) => {
+
+            const value = search.toLowerCase();
+
+            return (
+                doc.fileName.toLowerCase().includes(value) ||
+                doc.fileType.toLowerCase().includes(value) ||
+                doc.policy.policyNumber.toLowerCase().includes(value)
+            );
+
+        });
+
+    }, [documents, search]);
+
     return (
-    <Layout>
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-blue-700">
-          Document Management
-        </h1>
-      </div>
+        <Layout>
+            <div className="space-y-6">
 
-      <div className="bg-white p-6 rounded-xl shadow-lg mb-8">
+                <div className="flex justify-between items-center">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <h1 className="text-3xl font-bold text-blue-700">
+                        Document Management
+                    </h1>
 
-          <select
-            value={policyId}
-            onChange={(e) => setPolicyId(e.target.value)}
-            className="border p-2 rounded"
-          >
-            <option value="">Select Policy</option>
+                    <div className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+                        Total Documents : {filteredDocuments.length}
+                    </div>
 
-            {policies.map((policy) => (
-              <option key={policy.id} value={policy.id}>
-                {policy.policyNumber}
-              </option>
-            ))}
-          </select>
+                </div>
 
-          <input
-            type="file"
-            onChange={(e) => setSelectedFile(e.target.files[0])}
-            className="border p-2 rounded"
-          />
+                <div className="bg-white p-6 rounded-xl shadow-lg">
 
-          <button
-            onClick={uploadDocument}
-            className="bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Upload Document
-          </button>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
 
-        </div>
-      </div>
+                        <select
+                            value={policyId}
+                            onChange={(e) => setPolicyId(e.target.value)}
+                            className="border p-3 rounded"
+                        >
+                            <option value="">Select Policy</option>
 
-      <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+                            {policies.map((policy) => (
+                                <option
+                                    key={policy.id}
+                                    value={policy.id}
+                                >
+                                    {policy.policyNumber}
+                                </option>
+                            ))}
 
-        <table className="w-full">
-          <thead className="bg-blue-600 text-white">
-            <tr>
-              <th className="p-4 text-left">Policy</th>
-              <th className="p-4 text-left">File Name</th>
-              <th className="p-4 text-left">File Type</th>
-              <th className="p-4 text-left">View</th>
-              <th className="p-4 text-left">Actions</th>
-            </tr>
-          </thead>
+                        </select>
 
-          <tbody>
-            {documents.map((doc) => (
-              <tr
-                key={doc.id}
-                className="border-b hover:bg-gray-100"
-              >
-                <td className="p-4">
-                  {doc.policy.policyNumber}
-                </td>
+                        <input
+                            type="file"
+                            onChange={(e) =>
+                                setSelectedFile(e.target.files[0])
+                            }
+                            className="border p-2 rounded"
+                        />
 
-                <td className="p-4">
-                  {doc.fileName}
-                </td>
+                        <input
+                            type="text"
+                            placeholder="Search..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="border p-3 rounded"
+                        />
 
-                <td className="p-4">
-                  {doc.fileType}
-                </td>
+                        <button
+                            onClick={uploadDocument}
+                            className="bg-blue-600 text-white rounded hover:bg-blue-700"
+                        >
+                            Upload
+                        </button>
 
-                <td className="p-4">
-                  <a
-                    href={`http://localhost:5000/${doc.filePath}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 underline"
-                  >
-                    View
-                  </a>
-                </td>
+                    </div>
 
-                <td className="p-4">
-                  <button
-                    onClick={() => deleteDocument(doc.id)}
-                    className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-                </td>
-              </tr>
-            ))}
+                </div>
 
-            {documents.length === 0 && (
-              <tr>
-                <td
-                  colSpan="5"
-                  className="text-center p-6"
-                >
-                  No Documents Found
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
-          </Layout>
-  );
+                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
+
+                    <table className="w-full">
+
+                        <thead className="bg-blue-600 text-white">
+
+                            <tr>
+
+                                <th className="p-4">Policy</th>
+
+                                <th className="p-4">File Name</th>
+
+                                <th className="p-4">Type</th>
+
+                                <th className="p-4">Preview</th>
+
+                                <th className="p-4">Download</th>
+
+                                <th className="p-4">Delete</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            {filteredDocuments.length > 0 ? (
+
+                                filteredDocuments.map((doc) => (
+
+                                    <tr
+                                        key={doc.id}
+                                        className="border-b text-center hover:bg-gray-50"
+                                    >
+
+                                        <td className="p-4">
+                                            {doc.policy.policyNumber}
+                                        </td>
+
+                                        <td className="p-4">
+                                            {doc.fileName}
+                                        </td>
+
+                                        <td className="p-4">
+
+                                            <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+
+                                                {doc.fileType}
+
+                                            </span>
+
+                                        </td>
+
+                                        <td className="p-4">
+
+                                            <a
+                                                href={`http://localhost:5000/${doc.filePath}`}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="text-blue-600 underline"
+                                            >
+                                                View
+                                            </a>
+
+                                        </td>
+
+                                        <td className="p-4">
+
+                                            <a
+                                                href={`http://localhost:5000/${doc.filePath}`}
+                                                download
+                                                className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                                            >
+                                                Download
+                                            </a>
+
+                                        </td>
+
+                                        <td className="p-4">
+
+                                            <button
+                                                onClick={() => deleteDocument(doc.id)}
+                                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
+                                            >
+                                                Delete
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+
+                                ))
+
+                            ) : (
+
+                                <tr>
+
+                                    <td
+                                        colSpan="6"
+                                        className="p-8 text-center text-gray-500"
+                                    >
+                                        No Documents Found
+                                    </td>
+
+                                </tr>
+
+                            )}
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+            </div>
+
+        </Layout>
+    );
 }
 
 export default Documents;
