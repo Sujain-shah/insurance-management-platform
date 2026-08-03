@@ -266,8 +266,9 @@ function Documents() {
                                         <td className="p-4">
 
                                             <a
-                                                href={`http://localhost:5000/${doc.filePath}`}
-                                                download
+                                                href={`${import.meta.env.VITE_API_URL.replace("/api", "")}/${doc.filePath.replace(/\\/g, "/")}`}
+                                                target="_blank"
+                                                rel="noreferrer"
                                                 className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
                                             >
                                                 Download

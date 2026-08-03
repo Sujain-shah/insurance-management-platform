@@ -301,19 +301,41 @@ const deletePolicy = async (req, res) => {
     try {
         const id = Number(req.params.id);
 
+        await prisma.claim.deleteMany({
+            where: {
+                policyId: id,
+            },
+        });
+
+        await prisma.premiumPayment.deleteMany({
+            where: {
+                policyId: id,
+            },
+        });
+
+        await prisma.document.deleteMany({
+            where: {
+                policyId: id,
+            },
+        });
+
         await prisma.policy.delete({
-            where: { id },
+            where: {
+                id,
+            },
         });
 
         res.status(200).json({
             success: true,
             message: "Policy Deleted Successfully",
         });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             success: false,
-            message: "Server Error",
+            message: error.message,
         });
     }
 };

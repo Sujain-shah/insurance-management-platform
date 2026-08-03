@@ -243,23 +243,31 @@ const updateClaim = async (req, res) => {
 // Delete Claim
 const deleteClaim = async (req, res) => {
     try {
-        const { id } = req.params;
+        const id = Number(req.params.id);
+
+        await prisma.claimDocument.deleteMany({
+            where: {
+                claimId: id,
+            },
+        });
 
         await prisma.claim.delete({
             where: {
-                id: Number(id),
+                id,
             },
         });
 
         res.status(200).json({
             success: true,
-            message: "Claim deleted successfully",
+            message: "Claim Deleted Successfully",
         });
+
     } catch (error) {
         console.log(error);
+
         res.status(500).json({
             success: false,
-            message: "Server Error",
+            message: error.message,
         });
     }
 };
