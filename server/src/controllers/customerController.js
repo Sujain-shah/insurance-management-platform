@@ -396,10 +396,12 @@ const getCustomerHistory = async (req, res) => {
             },
         });
 
-        const totalDocuments = await prisma.document.count({
+        const totalDocuments = await prisma.claimDocument.count({
             where: {
-                policy: {
-                    customerId: customer.id,
+                claim: {
+                    policy: {
+                        customerId: customer.id,
+                    },
                 },
             },
         });

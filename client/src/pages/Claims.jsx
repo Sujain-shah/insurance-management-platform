@@ -339,7 +339,7 @@ function Claims() {
                         <div key={doc.id} className="mb-3">
 
                             <a
-                                href={`http://localhost:5000/${doc.filePath}`}
+                                href={`${BASE_URL}/${doc.filePath.replace(/\\/g, "/")}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 className="text-blue-600 underline"

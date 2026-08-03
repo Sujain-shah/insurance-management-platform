@@ -59,6 +59,9 @@ const getClaimDocuments = async (req, res) => {
             },
         });
 
+        console.log("Claim ID:", claimId);
+        console.log("Documents:", documents);
+
         res.status(200).json({
             success: true,
             data: documents,
