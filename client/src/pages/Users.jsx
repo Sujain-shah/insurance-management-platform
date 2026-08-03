@@ -64,7 +64,6 @@ function Users() {
                             <th className="p-4">Email</th>
                             <th className="p-4">Role</th>
                             <th className="p-4">Created</th>
-                            <th className="p-4">Action</th>
                         </tr>
                     </thead>
 
@@ -92,10 +91,6 @@ function Users() {
 
                                 <td className="p-4">
                                     {new Date(user.createdAt).toLocaleDateString()}
-                                </td>
-
-                                <td className="p-4 text-green-600 font-semibold">
-                                    Change Role
                                 </td>
 
                             </tr>

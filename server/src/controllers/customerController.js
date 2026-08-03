@@ -265,7 +265,36 @@ const deleteCustomer = async (req, res) => {
     try {
         const id = Number(req.params.id);
 
-        // Pehle customer ki saari claims delete karo
+        const customer = await prisma.customer.findUnique({
+            where: { id },
+            include: {
+                policies: {
+                    include: {
+                        claims: true,
+                    },
+                },
+            },
+        });
+
+        if (!customer) {
+            return res.status(404).json({
+                success: false,
+                message: "Customer Not Found",
+            });
+        }
+
+        // Delete Claim Documents
+        for (const policy of customer.policies) {
+            for (const claim of policy.claims) {
+                await prisma.claimDocument.deleteMany({
+                    where: {
+                        claimId: claim.id,
+                    },
+                });
+            }
+        }
+
+        // Delete Claims
         await prisma.claim.deleteMany({
             where: {
                 policy: {
@@ -274,17 +303,42 @@ const deleteCustomer = async (req, res) => {
             },
         });
 
-        // Fir customer ki saari policies delete karo
+        // Delete Premium Payments
+        await prisma.premiumPayment.deleteMany({
+            where: {
+                policy: {
+                    customerId: id,
+                },
+            },
+        });
+
+        // Delete Policy Documents
+        await prisma.document.deleteMany({
+            where: {
+                policy: {
+                    customerId: id,
+                },
+            },
+        });
+
+        // Delete Policies
         await prisma.policy.deleteMany({
             where: {
                 customerId: id,
             },
         });
 
-        // Ab customer delete karo
+        // Delete Customer
         await prisma.customer.delete({
             where: {
                 id,
+            },
+        });
+
+        // Delete User
+        await prisma.user.delete({
+            where: {
+                id: customer.userId,
             },
         });
 
