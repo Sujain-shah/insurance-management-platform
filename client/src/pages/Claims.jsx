@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import api from "../services/api";
+const BASE_URL =
+    import.meta.env.VITE_API_URL?.replace("/api", "") ||
+    "http://localhost:5000";
 
 function Claims() {
     const [claims, setClaims] = useState([]);
