@@ -46,6 +46,10 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("Login Email:", email);
+
+    const users = await prisma.user.findMany();
+    console.log(users);
 
     const user = await prisma.user.findUnique({
       where: { email },
