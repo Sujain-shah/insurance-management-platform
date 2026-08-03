@@ -4,6 +4,9 @@ const prisma = new PrismaClient();
 
 const uploadDocument = async (req, res) => {
   try {
+    console.log("=== UPLOAD API HIT ===");
+    console.log(req.body);
+    console.log(req.file);
     const { policyId } = req.body;
 
     if (!req.file) {
@@ -21,6 +24,7 @@ const uploadDocument = async (req, res) => {
         policyId: Number(policyId),
       },
     });
+    console.log("Saved document:", document);
 
     res.status(201).json({
       success: true,
@@ -29,6 +33,7 @@ const uploadDocument = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    console.log("UPLOAD ERROR:", error);
 
     res.status(500).json({
       success: false,

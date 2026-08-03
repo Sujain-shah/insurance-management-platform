@@ -253,7 +253,7 @@ function Documents() {
                                         <td className="p-4">
 
                                             <a
-                                                href={`http://localhost:5000/${doc.filePath}`}
+                                                href={`https://insurance-management-api-dcuy.onrender.com/${doc.filePath.replace(/\\/g, "/")}`}
                                                 target="_blank"
                                                 rel="noreferrer"
                                                 className="text-blue-600 underline"
